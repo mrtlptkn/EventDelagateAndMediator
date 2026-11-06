@@ -1,0 +1,6 @@
+@baseUrl = https://localhost:7186
+
+GET {{baseUrl}}/api/eventdelegates/demo
+Accept: application/json
+
+###
