@@ -43,6 +43,17 @@
     }
   }
 
+  public record OrderPlacedEventArgs(string OrderId, decimal total, string customer);
+
+  public class EmailService
+  {
+    // EventHandler delegate imzasına sahip bir method.
+    public void OnOrderPlaced(object? sender,OrderPlacedEventArgs e)
+    {
+      Console.WriteLine($"[Email] confimation sent to {e.customer} , total: {e.total}");
+    }
+  }
+
   public class OrderService
   {
     // fields
@@ -52,6 +63,8 @@
 
     // Reject edilen değer ile ilgili neden reject olduğunu döndürdüğümüz bir event
     public event Action<string> OrderRejected;
+
+    public event EventHandler<OrderPlacedEventArgs> OrderPlaced;
 
     public OrderService(Action<string> log, OrderRules orderRules, DiscountStrategyDelegate discountStrategy)
     {
@@ -77,6 +90,7 @@
       var discountedTotal = _discountStrategy(order.Quantity * order.ListPrice);
       _log($"Order {order.orderUUID} total after discount tutar {discountedTotal}");
       // OrderPlaced.Invoke();
+      OrderPlaced?.Invoke(this, new OrderPlacedEventArgs(order.orderUUID, discountedTotal, order.CustomerName));
 
     }
    

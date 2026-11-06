@@ -140,7 +140,7 @@ namespace EventDelagateAndMediator.Endpoints
       group.MapPost("/placeOrder", () =>
       {
 
-        var orderRequest = new Order("", 1500, 10, "Ürün A", "Ali");
+        var orderRequest = new Order(Guid.NewGuid().ToString(), 1500, 10, "Ürün A", "Ali");
 
         Action<string> log = (message) => Console.WriteLine("[Log]" + message);
 
@@ -164,8 +164,13 @@ namespace EventDelagateAndMediator.Endpoints
         rules2.AddRule("List Price 0 olamaz", x => x.ListPrice != 0);
         rules2.AddRule("OrderID ve CustomerName Empty veya Null geçilemez", x => !String.IsNullOrEmpty(x.orderUUID) && !String.IsNullOrEmpty(x.CustomerName));
 
+        // Subscriber
+        EmailService e = new EmailService();
+
         var orderService2 = new OrderService(log, rules2, strategy2);
         orderService2.OrderRejected += (message) => Console.WriteLine($"İşlem İptal Edildi: {message}");
+        orderService2.OrderPlaced += e.OnOrderPlaced; // email servis methodunu tetikle.
+
         orderService2.SubmitOrder(orderRequest);
 
       });
@@ -174,6 +179,8 @@ namespace EventDelagateAndMediator.Endpoints
       return builder;
 
     }
+
+   
 
     private static void Downloader_DownloadCompleted(string obj)
     {
