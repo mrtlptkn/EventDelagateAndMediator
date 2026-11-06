@@ -1,5 +1,9 @@
 ﻿using EventDelagateAndMediator.EventDelegates;
-using Microsoft.AspNetCore.Http.HttpResults;
+using EventDelagateAndMediator.EventDelegates.Email;
+using EventDelagateAndMediator.EventDelegates.Order;
+using EventDelagateAndMediator.EventDelegates.Order.Rules;
+using EventDelagateAndMediator.EventDelegates.Order.Services;
+using EventDelagateAndMediator.EventDelegates.Order.Settings;
 using System.Reflection;
 
 namespace EventDelagateAndMediator.Endpoints
