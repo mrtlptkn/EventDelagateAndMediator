@@ -30,7 +30,7 @@ namespace EventDelagateAndMediator.Endpoints
       var group = builder.MapGroup("/api/eventdelegates").WithTags("Event Delegate");
 
 
-      group.MapGet("/demo", () =>
+      group.MapGet("/demo", async () =>
       {
         // Bir delegate üzerinden birdeb fazka aynı imzaya sahip methodu çalıştırdık.
 
@@ -141,7 +141,7 @@ namespace EventDelagateAndMediator.Endpoints
       .WithName("Event Delegate Demo");
 
 
-      group.MapPost("/placeOrder", () =>
+      group.MapPost("/placeOrder", async () =>
       {
 
         var orderRequest = new Order(Guid.NewGuid().ToString(), 1500, 10, "Ürün A", "Ali");
