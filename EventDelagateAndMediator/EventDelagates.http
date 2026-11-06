@@ -4,3 +4,6 @@ GET {{baseUrl}}/api/eventdelegates/demo
 Accept: application/json
 
 ###
+
+POST {{baseUrl}}/api/eventdelegates/placeOrder
+Accept: application/json

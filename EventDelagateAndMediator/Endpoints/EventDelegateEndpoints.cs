@@ -136,6 +136,41 @@ namespace EventDelagateAndMediator.Endpoints
       })
       .WithName("Event Delegate Demo");
 
+
+      group.MapPost("/placeOrder", () =>
+      {
+
+        var orderRequest = new Order("", 1500, 10, "Ürün A", "Ali");
+
+        Action<string> log = (message) => Console.WriteLine("[Log]" + message);
+
+        DiscountStrategyDelegate strategy = DiscountSettings.HalfPriceDiscount;
+
+        var rules = new OrderRules();
+        rules.AddRule("En fazla 100 adet aynı anda sipariş edilebilir", x => x.Quantity < 100);
+        rules.AddRule("Customer Name boş olmaz", x => !String.IsNullOrEmpty(x.CustomerName));
+
+        var orderService = new OrderService(log, rules, strategy);
+        // event listener
+        orderService.OrderRejected += (message) => Console.WriteLine($"İşlem İptal Edildi: {message}");
+
+        orderService.SubmitOrder(orderRequest);
+
+        //****************************************************************//
+
+        DiscountStrategyDelegate strategy2 = DiscountSettings.NoDiscount;
+
+        var rules2 = new OrderRules();
+        rules2.AddRule("List Price 0 olamaz", x => x.ListPrice != 0);
+        rules2.AddRule("OrderID ve CustomerName Empty veya Null geçilemez", x => !String.IsNullOrEmpty(x.orderUUID) && !String.IsNullOrEmpty(x.CustomerName));
+
+        var orderService2 = new OrderService(log, rules2, strategy2);
+        orderService2.OrderRejected += (message) => Console.WriteLine($"İşlem İptal Edildi: {message}");
+        orderService2.SubmitOrder(orderRequest);
+
+      });
+
+
       return builder;
 
     }
@@ -146,3 +181,4 @@ namespace EventDelagateAndMediator.Endpoints
     }
   }
 }
+ 
