@@ -1,5 +1,7 @@
 ﻿using EventDelagateAndMediator.AsyncProgramming.Models;
 using EventDelagateAndMediator.AsyncProgramming.Services;
+using System.Diagnostics;
+using System.Security.Principal;
 
 namespace EventDelagateAndMediator.Endpoints
 {
@@ -44,10 +46,10 @@ namespace EventDelagateAndMediator.Endpoints
       group.MapPost("demo", async (
         PricingService pricingService, 
         ShippingService shippingService, 
+        NotificationService notificationService,
         CancellationToken ct) =>
       {
-
-        await Task.Delay(1000);
+        // await Task.Delay(1000);
 
         try
         {
@@ -56,6 +58,26 @@ namespace EventDelagateAndMediator.Endpoints
 
           ShippingQuote shippingQuote = await shippingService.GetFastestQuoteAsync(ct);
           Console.WriteLine($"shippingQuote:{shippingQuote.Provider}");
+
+
+          // Uygulama 1: Performansız bir kod yazmış olduk. toplam 600ms+600ms+300ms sürdü
+
+          //Stopwatch sp = Stopwatch.StartNew();
+
+          //await notificationService.SendSmsAsync("874545454", ct);
+          //await notificationService.SendEmailAsync("ali", ct);
+          //await notificationService.SendAccountingAsync("sadsad", ct);
+
+          //sp.Stop();
+
+          //Console.WriteLine("Elapsed" + sp.ElapsedMilliseconds);
+
+
+          // Uygulama 2:Ama bu şekilde yazarsak toplam en uzun süren kaydar sürüp sonuçlandı.
+
+          var results = await notificationService.NotifyAllAsync("ali@test.com", "05444441414", "78454512", ct);
+
+
 
           return Results.Ok(new { price, shippingQuote });
         }
