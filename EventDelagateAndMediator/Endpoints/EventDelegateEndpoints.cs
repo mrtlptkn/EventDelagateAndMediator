@@ -144,7 +144,7 @@ namespace EventDelagateAndMediator.Endpoints
       group.MapPost("/placeOrder", async () =>
       {
 
-        var orderRequest = new Order(Guid.NewGuid().ToString(), 1500, 10, "Ürün A", "Ali");
+        var orderRequest = new OrderRequest(Guid.NewGuid().ToString(), 1500, 10, "Ürün A", "Ali");
 
         Action<string> log = (message) => Console.WriteLine("[Log]" + message);
 

@@ -20,7 +20,7 @@ namespace EventDelagateAndMediator.EventDelegates.Order.Services
       _orderRules = orderRules;
       _discountStrategy = discountStrategy;
     }
-    public void SubmitOrder(Order order)
+    public void SubmitOrder(OrderRequest order)
     {
       _log($"Processing Order for {order.orderUUID}");
 

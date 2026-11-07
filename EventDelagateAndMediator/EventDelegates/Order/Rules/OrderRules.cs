@@ -4,9 +4,9 @@
   {
 
     // Burası sipariş işlemi yaparken dinamik kurallara göre bir validayon uygulaması sağlar.
-    public List<(string Name, Func<Order, bool> Check)> Rules { get; } = new();
+    public List<(string Name, Func<OrderRequest, bool> Check)> Rules { get; } = new();
 
-    public void AddRule(string name, Func<Order, bool> check)
+    public void AddRule(string name, Func<OrderRequest, bool> check)
     {
       Rules.Add((name, check));
     }
