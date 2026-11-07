@@ -10,7 +10,7 @@ namespace EventDelagateAndMediator.AsyncProgramming.Services
   // Ürün-B,2, 200
   public class PricingService
   {
-    private readonly ConcurrentDictionary<string,decimal> _cache = new(); // In Memory Database
+    public readonly ConcurrentDictionary<string,decimal> _cache = new(); // In Memory Database
     public ValueTask<decimal> GetPriceAsync(string ProductId,CancellationToken cts = default)
     {
       if(_cache.TryGetValue(ProductId, out var cachedPrice))
@@ -20,9 +20,9 @@ namespace EventDelagateAndMediator.AsyncProgramming.Services
     }
 
     // Task sadece DB, HttpClient Request, Async I/O gibi işlemlerde kullanırız. içindeki kod full asenkron yazılmalıdır.
-    private async Task<decimal> FetchPriceFromRemoteAsync(string ProductID, CancellationToken cts = default)
+    private async Task<decimal> FetchPriceFromRemoteAsync(string ProductID, CancellationToken ct = default)
     {
-      await Task.Delay(500); // Ağ geçikmesi yapalım
+      await Task.Delay(500,ct); // Ağ geçikmesi yapalım
 
       decimal price = ProductID 
         switch

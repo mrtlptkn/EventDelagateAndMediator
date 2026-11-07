@@ -1,0 +1,7 @@
+@baseUrl = https://localhost:7186
+
+POST {{baseUrl}}/api/async-programming/demo
+Accept: application/json
+
+###
+
