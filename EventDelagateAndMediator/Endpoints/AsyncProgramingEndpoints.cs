@@ -54,10 +54,14 @@ namespace EventDelagateAndMediator.Endpoints
         try
         {
           decimal price = await pricingService.GetPriceAsync("Ürün-A", ct);
-          Console.WriteLine($"price: {price}");
+          Console.WriteLine($"price: {price}"); // await Non-blocking kodlar yazmayı sağlar
 
           ShippingQuote shippingQuote = await shippingService.GetFastestQuoteAsync(ct);
           Console.WriteLine($"shippingQuote:{shippingQuote.Provider}");
+
+
+          // shippingService.GetFastestQuoteAsync(ct).Result; // kodu senkronlaştırır 
+          // shippingService.GetFastestQuoteAsync(ct).GetAwaiter().GetResult(); // kodu bloke etmiş oluruz.
 
 
           // Uygulama 1: Performansız bir kod yazmış olduk. toplam 600ms+600ms+300ms sürdü

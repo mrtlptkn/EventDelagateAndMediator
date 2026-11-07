@@ -42,6 +42,8 @@ namespace EventDelagateAndMediator.AsyncProgramming.Services
 
       try
       {
+        // Task.WhenAll().Wait(); // Kod burada yanlışlıkla kullanımdan kaynalık senkron oldu. Blocked
+
         await Task.WhenAll(tasks);
         Console.WriteLine($"ElapsedTime" + sp.ElapsedMilliseconds); // toplamda ne kadar sürdüğünü
         sp.Stop();
