@@ -74,7 +74,6 @@ namespace EventDelagateAndMediator.Endpoints
 
 
           // Uygulama 2:Ama bu şekilde yazarsak toplam en uzun süren kaydar sürüp sonuçlandı.
-
           var results = await notificationService.NotifyAllAsync("ali@test.com", "05444441414", "78454512", ct);
 
 
@@ -94,6 +93,17 @@ namespace EventDelagateAndMediator.Endpoints
 
 
       });
+
+
+      group.MapPost("wheneach", async (FastShippingDecisionService fs,CancellationToken ct) =>
+      {
+
+        var results =  await fs.RunAsync(ct);
+
+        return Results.Ok(results);
+
+      });
+
 
       return builder;
 

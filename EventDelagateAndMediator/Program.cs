@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<PricingService>();
 builder.Services.AddSingleton<ShippingService>();
 builder.Services.AddSingleton<NotificationService>();
+builder.Services.AddSingleton<FastShippingDecisionService>();
 
 var app = builder.Build();
 
