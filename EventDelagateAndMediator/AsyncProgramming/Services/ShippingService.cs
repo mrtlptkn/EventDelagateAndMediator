@@ -18,25 +18,23 @@ namespace EventDelagateAndMediator.AsyncProgramming.Services
     public async Task<ShippingQuote> GetFastestQuoteAsync(CancellationToken ct = default)
     {
       using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-      cts.CancelAfter(100); // 100 ms beklemeden sonra otomatik olarak iptal tetiklensin çalışmıyor bir kontrol edelim.
+      cts.CancelAfter(TimeSpan.FromMilliseconds(300));
 
+      var quoteTasks = Providers
+          .Select(x => FetchQuoteAsync(x.Provider, x.Fee, x.DelayMs, x.DelayMs > 500, cts.Token))
+          .ToList();
 
-      await Task.Delay(1000); // 1000 ms içerisinde  istek network üzerinden iptal edilirse aşağıda kod ile sınıf için istek iptal exception fırlatıyoruz.
-
-      // Eğer istek uzun sürerde iptal gerçekleşirse iptal exception'ı fırlat.
-      // Kullanıcı bir iptal talebinde bulunursa o zaman iptal exception fırlat
-      if (ct.IsCancellationRequested)
+      try
       {
-        ct.ThrowIfCancellationRequested();
+        Task<ShippingQuote> firstCompletedTask = await Task.WhenAny(quoteTasks);
+        return await firstCompletedTask;
+      }
+      catch (OperationCanceledException) when (!ct.IsCancellationRequested) // CancelAfter iptali
+      {
+        // Dış iptal değil, 300 ms süre aşımı
+        throw new TimeoutException("Kargo teklifleri 300 ms içinde alınamadı.");
       }
 
-      var qouteTasks = Providers.Select(x => FetchQuoteAsync(x.Provider, x.Fee, x.DelayMs, x.DelayMs > 500, ct)).ToList();
-
-        // elimdeki tüm kargo sağlayıcılarında sadece en hızlı olan çözümle
-       Task<ShippingQuote> firstCompletedTask = await Task.WhenAny(qouteTasks);
-
-       return await firstCompletedTask;
-      
     }
 
     // Remote Quote Servis

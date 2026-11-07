@@ -47,6 +47,8 @@ namespace EventDelagateAndMediator.Endpoints
         CancellationToken ct) =>
       {
 
+        await Task.Delay(1000);
+
         try
         {
           decimal price = await pricingService.GetPriceAsync("Ürün-A", ct);
