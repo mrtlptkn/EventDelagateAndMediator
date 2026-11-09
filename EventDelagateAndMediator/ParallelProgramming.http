@@ -1,0 +1,20 @@
+@baseUrl = https://localhost:7186
+
+POST {{baseUrl}}/api/parallel-programming/demo
+Accept: application/json
+
+###
+
+POST {{baseUrl}}/api/parallel-programming/demo2
+Accept: application/json
+
+###
+
+POST {{baseUrl}}/api/parallel-programming/demo3
+Accept: application/json
+
+
+###
+
+POST {{baseUrl}}/api/parallel-programming/demo4
+Accept: application/json

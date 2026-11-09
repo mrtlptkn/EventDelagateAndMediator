@@ -19,6 +19,7 @@ app.Use(async (context, next) =>
 app.UseHttpsRedirection();
 app.MapEventDelegateEndpoints();
 app.MapAsyncProgramingEndpoints();
+app.MapParallelProgramingEndpoints();
 app.Run();
 
 
