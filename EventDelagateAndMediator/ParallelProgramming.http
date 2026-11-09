@@ -18,3 +18,31 @@ Accept: application/json
 
 POST {{baseUrl}}/api/parallel-programming/demo4
 Accept: application/json
+
+###
+
+POST {{baseUrl}}/api/parallel-programming/demo5
+Accept: application/json
+
+###
+
+POST {{baseUrl}}/api/parallel-programming/demo6
+Accept: application/json
+
+
+###
+
+POST {{baseUrl}}/api/parallel-programming/demo7
+Accept: application/json
+
+
+###
+
+POST {{baseUrl}}/api/parallel-programming/demo8
+Accept: application/json
+
+
+###
+
+POST {{baseUrl}}/api/parallel-programming/demo9
+Accept: application/json

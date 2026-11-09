@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace EventDelagateAndMediator.Endpoints
 {
@@ -126,7 +127,7 @@ namespace EventDelagateAndMediator.Endpoints
       });
 
 
-      group.Map("/demo4", async () =>
+      group.MapPost("/demo4", async () =>
       {
 
         var action1 = new Action(() =>
@@ -185,7 +186,157 @@ namespace EventDelagateAndMediator.Endpoints
 
 
       // Kilitleri nasıl uygularız, race condition nasıl oluşur ? Bu durumdan kurtulmak için ne tür sınıflar thread-safe var
-      
+
+      group.MapPost("/demo5", () =>
+      {
+        // shared Data
+        int counter = 0;
+
+
+        Parallel.For(0, 100000, (i) =>
+        {
+          Thread.SpinWait(1000);
+          counter++; // her dönüş işleminde shared data güncellemesi var 
+          // Acaba threadler bu veriyi bozucak mı ?
+
+
+        });
+
+        return Results.Ok(new { counter }); // 100000
+
+      });
+
+
+      // Birinci yöntem
+      group.MapPost("/demo6", () =>
+      {
+        // shared Data
+        int counter = 0;
+
+        object SyncObject = new object(); // boş bir kilit objesi tanımladık
+
+
+        Parallel.For(0, 100000, (i) =>
+        {
+          Thread.SpinWait(1000);
+
+          lock(SyncObject) // thread-safe çalışabilmek için bir kilit uyguladık.
+            counter++; // her dönüş işleminde shared data güncellemesi var 
+          // Acaba threadler bu veriyi bozucak mı ?
+
+
+        });
+
+        return Results.Ok(new { counter }); // 100000
+
+      });
+
+      // Interlock kendi içinde lockObject kullanmadan thread-safe çalışıp threadler arasında ortak veri paylaşımını yapmamızı sağlayan bir sınıf
+      group.MapPost("/demo7", () =>
+      {
+        // shared Data
+        int counter = 0;
+        ConcurrentBag<int> data = new(); // Elde ettiğimiz sonuçları listelere doldurma gibi durumlarımız varsa bu durumda normal collection kullanamayız bunun yeni, ConcurentDicrionary ve ConcurentBag gibi thread-safe collection kullanmamız gerekir. 
+        // içerisine atılan listedeki verilerin sıra garantisi vermez. Sıra garantisi istersek BlockingCollection gibi Thread-Safe collection kullanmamız lazım fakat concurentBag göre çok daha yavaş çalışır. 
+
+        Parallel.For(0, 100000, (i) =>
+        {
+          Thread.SpinWait(1000);
+
+          Interlocked.Increment(ref counter);
+          // Acaba threadler bu veriyi bozucak mı ?
+          data.Add(counter);
+
+
+        });
+
+        // Nedeni ise threadlerin çalışma sırasını bilmiyoruz.
+        // paralel işleme bittikten sonra yapılması gerekir. 
+       var orderedList =   data.OrderBy(x=>x);
+
+        return Results.Ok(new { counter, data }); // 100000
+
+      });
+
+
+
+      // Eğer normal lock kullanmak istemezse bu durumda aslında bunun tam karşılığı olan bir Monitor sınıfı var 
+      // Monitor.Enter(lockObject) // Kilit alma (try) bloğunun öncesinde yazarız 
+      // Monitor.Exist(lockObject) // Kilit bırakama (finally) bloğunda yazarız
+      group.MapPost("/demo8", () =>
+      {
+        // Inprocess süreçlerde bu tarz kilitler ilgili processin atomik olmasını sağlar.
+        // shared Data
+        int counter = 0;
+
+        object SyncObject = new object(); // boş bir kilit objesi tanımladık
+
+        Parallel.For(0, 100000, (i) =>
+        {
+          
+          Monitor.Enter(SyncObject);
+          try
+          {
+            Thread.SpinWait(1000);
+            counter++; // Kilit varken Thread arası uygulanan logic
+          }
+          catch (Exception ex)
+          {
+            Console.WriteLine(ex.Message);
+          } 
+          finally
+          {
+            Monitor.Exit(SyncObject); // Bir sonraki thread shared Data üzerinde işlem yapabilsin diye kilidi bıraktık
+          }
+        });
+
+        return Results.Ok(new { counter }); // 100000
+
+      });
+
+
+      // Not: Eğer bir uygulama kodu farklı uygulamalardan tetikleniyorsa, bu farklı uygulamalardan tetiklenen eş zamanlı concurent durumlarda in process olarak kullanılan yapılar yerine Mutex değimiz out process ilgili sınıflar kullanır.
+      // Mutex işletim sistemi düzeyinde direk olarak Thread sınıfları ile çalışır.
+
+      group.MapPost("/demo9", () =>
+      {
+        int mutexCounter = 0;
+        using Mutex m = new Mutex(initiallyOwned: false, name: "LogDosyası"); // Farklı processler burayı ortak olarak kullanacak ise mutex Name alanına bir isim verin. Bu ortak isim üzerinden kilit açar
+
+
+        Thread[] mutexThreads = new Thread[100];
+
+        for (int i = 0; i < 100; i++)
+        {
+          mutexThreads[i] = new Thread(() =>
+          {
+
+            m.WaitOne(); // Sırası gelene kadar thread beklesin kilit kısmı
+
+            try
+            {
+              Thread.SpinWait(100); // Algoritma kodu
+              mutexCounter++;
+
+              File.AppendAllText("log.txt",$" -> PID {Environment.ProcessId} \n");
+
+            }
+            finally
+            {
+              m.ReleaseMutex();// kilidi geri bırak
+            }
+            
+          });
+        }
+
+        foreach (Thread thread in mutexThreads)
+          thread.Start();
+
+        foreach (Thread thread in mutexThreads)
+          thread.Join(); // Main Thread bağlama -> Eğer Main Thread sonlarınırsa thread ThreadPool devredilir. Yoksa arka planda çalışmaya devam ederler.
+
+        return Results.Ok(mutexCounter);
+      });
 
 
 
